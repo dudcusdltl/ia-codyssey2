@@ -1,0 +1,22 @@
+클라이언트 여러 개 실행
+
+python client.py 127.0.0.1 5000 alice
+python client.py 127.0.0.1 5000 bob
+python client.py 127.0.0.1 5000 carol
+
+
+더 심플하게: 그냥 python client.py만 쳐도 기본값(닉네임 user)으로 붙음.
+
+기능 확인 체크
+
+입장/퇴장: [SYSTEM] [닉] 님이 입장/퇴장하셨습니다. 자동 방송
+
+전체 채팅: 닉네임> 메시지 형식
+
+종료: /종료
+
+귓속말(보너스): /w bob 안녕
+
+받는 쪽: (귓속말) alice> 안녕
+
+보낸 쪽: (귓속말 보냄) bob에게> 안녕
