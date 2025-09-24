@@ -1,0 +1,101 @@
+1. API 호출 부분
+API_URL = 'https://news.kbs.co.kr/api/getNewestList'
+
+
+KBS 뉴스 서버에서 제공하는 최신 뉴스 JSON API 주소입니다.
+
+requests.get()으로 호출해서 JSON 데이터를 받아옵니다.
+
+def fetch_json(url: str, timeout: int = TIMEOUT) -> Any:
+    resp = requests.get(url, headers=headers, timeout=timeout)
+    resp.raise_for_status()
+    return resp.json()
+
+
+요청이 실패하면 예외(RequestException) 발생 → 프로그램이 종료되지 않고 에러 메시지 출력.
+
+2. JSON 구조 해석
+
+KBS API 응답 구조는 상황에 따라 "list", "data", "items" 같은 여러 키 안에 뉴스 배열이 들어있을 수 있어요.
+그래서 함수 as_iterable()로 응답에서 뉴스 리스트를 자동 탐색합니다.
+
+def as_iterable(obj: Any) -> Iterable:
+    if isinstance(obj, (list, tuple)):
+        return obj
+    if isinstance(obj, dict):
+        for key in ('list', 'items', 'data', 'result', 'rows', 'news', 'contents'):
+            val = obj.get(key)
+            if isinstance(val, (list, tuple)):
+                return val
+
+3. 뉴스 제목과 URL 추출
+TITLE_KEYS = ('newsTitle', 'title', 'headline', 'subject', 'name')
+URL_KEYS = ('link_url', 'url', 'newsUrl', 'article_url', 'path', 'link')
+
+
+KBS가 어떤 키 이름을 쓰든 간에, 후보들을 순서대로 탐색해서 제목과 링크를 가져옴.
+
+html.unescape()를 사용해서 HTML 특수문자(&quot;, &amp; 등)를 사람이 읽을 수 있는 문자열로 변환.
+
+4. 출력
+def print_headlines(items: List[Tuple[str, str]]) -> None:
+    for i, (title, url) in enumerate(items, 1):
+        print(f'{i:02d}. {title}')
+        if url:
+            print(f'    - {url}')
+
+
+순번 붙여서 뉴스 제목 출력
+
+링크가 있으면 밑에 같이 출력
+
+5. 보너스 과제: 날씨
+def get_weather_summary(city: str = 'Seoul') -> str:
+    url = f'http://wttr.in/{city}?format=j1'
+    resp = requests.get(url)
+    data = resp.json()
+    curr = data['current_condition'][0]
+    return f'{city}: {desc}, {temp_c}°C (체감 {feels}°C), 습도 {humidity}%'
+
+
+wttr.in 서비스에서 JSON으로 날씨 정보를 불러옵니다.
+
+현재 기온, 체감온도, 습도를 한 줄로 요약해서 보여줍니다.
+
+6. 실행 흐름
+
+fetch_json() → KBS 뉴스 API 호출
+
+extract_headlines() → 뉴스 배열 탐색 + "newsTitle" 등 키에서 제목 뽑기
+
+print_headlines() → 결과 출력
+
+get_weather_summary() → 날씨 출력
+
+✨ 요약
+
+헤드라인 뉴스: KBS 공식 API(getNewestList)에서 "newsTitle"을 직접 가져와 출력
+
+보너스 날씨: wttr.in JSON API에서 현재 날씨 요약 출력
+
+유연성: API 구조가 바뀌더라도 여러 키 후보를 지원 → 쉽게 망가지지 않음
+
+옵션:
+
+--limit : 뉴스 몇 개 출력할지
+
+--city : 날씨 도시 변경
+
+--debug : 실제 JSON 구조 확인용
+
+👉 실행하면 아래처럼 나옵니다:
+
+[KBS 최신 헤드라인]
+01. 마크롱, 유엔서 트럼프 겨냥 “강자의 법칙 위험” 경고
+    - https://news.kbs.co.kr/news/view.do?ncd=1234567
+02. 정부, 에너지 전환 계획 발표
+    - https://news.kbs.co.kr/news/view.do?ncd=1234568
+...
+
+[보너스] 현재 날씨
+ - Seoul: 구름조금, 22°C (체감 21°C), 습도 60%
