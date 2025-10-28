@@ -1,0 +1,114 @@
+어떻게 쓰면 되나
+1) CSV 준비
+
+파일명: mail_target_list.csv
+형식(헤더 포함, UTF-8 or UTF-8-SIG 권장):
+
+이름,이메일
+홍길동,hong@example.com
+김영희,younghee@example.com
+
+2) 개별 발송 (추천)
+
+장점: 주소 노출 방지, 스팸 필터에 유리, {name} 개인화 가능
+
+python sendmail.py \
+  --from yourid@gmail.com \
+  --subject '안내드립니다, {name} 님' \
+  --body '텍스트 본문입니다. {name} 님, 확인 부탁드립니다.' \
+  --html '<h3>{name} 님 안녕하세요</h3><p>HTML 본문 테스트입니다.</p>' \
+  --csv mail_target_list.csv
+
+
+또는 HTML을 파일로:
+
+python sendmail.py \
+  --from yourid@gmail.com \
+  --subject '서비스 점검 안내 ({name} 님)' \
+  --body 'HTML을 지원하지 않는 메일앱용 텍스트 대체본문입니다.' \
+  --html-file notice.html \
+  --csv mail_target_list.csv
+
+
+첨부파일 예:
+
+python sendmail.py \
+  --from yourid@gmail.com \
+  --subject '리포트 전달 ({name} 님)' \
+  --html-file report_mail.html \
+  --attach ./report.pdf ./log.txt \
+  --csv mail_target_list.csv
+
+3) 일괄 발송 (한 통으로 여러 명)
+
+--mode bulk 사용. 주소가 서로 보이지 않게 하려면 --bcc 권장.
+
+# 수신자들을 To 헤더에 나열 (주소가 서로 보임)
+python sendmail.py \
+  --from yourid@gmail.com \
+  --subject '전체 공지' \
+  --html '<p>전체 공지입니다.</p>' \
+  --csv mail_target_list.csv \
+  --mode bulk
+
+# 수신자들을 Bcc로 숨김 (주소 비공개)
+python sendmail.py \
+  --from yourid@gmail.com \
+  --subject '전체 공지' \
+  --html '<p>전체 공지입니다.</p>' \
+  --csv mail_target_list.csv \
+  --mode bulk --bcc
+
+4) 인증/서버 설정
+
+기본: Gmail (smtp.gmail.com:587, STARTTLS)
+
+2단계 인증이면 앱 비밀번호 사용 권장
+(환경변수도 지원: GMAIL_USER, GMAIL_APP_PASSWORD)
+
+# Windows (PowerShell)
+setx GMAIL_USER "yourid@gmail.com"
+setx GMAIL_APP_PASSWORD "16자리앱비번"
+
+# macOS/Linux (bash)
+export GMAIL_USER='yourid@gmail.com'
+export GMAIL_APP_PASSWORD='16자리앱비번'
+
+
+SSL 직결(465)로 쓰고 싶으면 --ssl --port 465
+
+디버그 로그: --debug
+
+5) {name} 개인화
+
+--mode each에서만 동작 (개별 발송이라서)
+
+{name} 토큰이 --subject, --body, --html/--html-file에 있으면 CSV의 이름으로 치환됩니다.
+
+왜 “개별(each)”이 더 좋은가?
+
+보안/프라이버시: 주소 공개 방지
+
+전달성: 대량 수신자가 한 통에 있으면 스팸 점수↑
+
+개인화: {name} 치환으로 응답률 개선
+⇒ 대규모 공지는 bulk --bcc, 나머지는 **개별(each)**을 기본 추천.
+
+보너스 과제: 네이버로도 보내보기
+
+이 스크립트 그대로 사용해서 서버만 바꾸면 됩니다.
+
+호스트/포트:
+
+--host smtp.naver.com --port 587 (STARTTLS) 또는
+
+--host smtp.naver.com --port 465 --ssl (SSL 직결)
+
+로그인 계정/발신 주소는 네이버 메일 주소로 맞추세요:
+
+python sendmail.py \
+  --host smtp.naver.com --port 587 \
+  --from yourid@naver.com --user yourid@naver.com \
+  --subject '네이버 SMTP 테스트' \
+  --html '<b>네이버 SMTP</b> 테스트' \
+  --csv mail_target_list.csv
