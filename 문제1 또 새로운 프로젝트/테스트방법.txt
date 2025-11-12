@@ -1,0 +1,16 @@
+# 가상환경 활성화 상태에서
+uvicorn todo:app --host 0.0.0.0 --port 8000 --reload
+
+
+# 1) 빈 딕셔너리 전송 → 400 경고 (보너스 과제)
+curl -X POST "http://127.0.0.1:8000/add_todo" \
+     -H "Content-Type: application/json" \
+     -d "{}"
+
+# 2) 정상 추가
+curl -X POST "http://127.0.0.1:8000/add_todo" \
+     -H "Content-Type: application/json" \
+     -d "{\"title\":\"회의 준비\",\"owner\":\"한송희\",\"done\":false}"
+
+# 3) 목록 조회
+curl -X GET "http://127.0.0.1:8000/retrieve_todo"
