@@ -1,0 +1,23 @@
+# 제출 패키지
+- model.py
+- todo.py
+- client.py
+
+## 실행
+```bash
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# macOS/Linux
+source .venv/bin/activate
+
+pip install fastapi uvicorn pydantic
+uvicorn todo:app --reload
+```
+
+## 간단 테스트 (별도 터미널)
+```bash
+python client.py
+# 또는 curl 사용
+curl -X POST "http://127.0.0.1:8000/add_todo" -H "Content-Type: application/json" -d "{\"title\":\"테스트\",\"owner\":\"me\",\"done\":false}"
+```
