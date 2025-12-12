@@ -1,0 +1,15 @@
+실행 요약
+
+가상환경 생성 및 패키지 설치
+pip install fastapi uvicorn sqlalchemy alembic
+
+마이그레이션 적용
+alembic upgrade head
+
+서버 실행
+uvicorn main:app --reload
+
+API 문서
+http://127.0.0.1:8000/docs
+
+DB 확인은 sqlite3 app.db ".tables" 또는 DB Browser for SQLite로 열어보시면 됩니다.
