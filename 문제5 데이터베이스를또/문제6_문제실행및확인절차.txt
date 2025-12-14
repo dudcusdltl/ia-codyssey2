@@ -1,0 +1,20 @@
+실행 및 확인 절차 요약
+
+패키지 설치
+pip install fastapi uvicorn sqlalchemy alembic
+
+마이그레이션 적용(권장)
+alembic upgrade head
+
+서버 실행
+uvicorn main:app --reload
+
+보너스 과제 확인(문서 UI)
+브라우저에서 http://127.0.0.1:8000/docs 로 이동 → GET /api/question 실행
+
+cURL로 목록 조회
+
+curl -s "http://127.0.0.1:8000/api/question" | python -m json.tool
+
+
+PEP 8, 네이밍 규칙, 문자열 규칙(기본 작은따옴표), autocommit=False/autoflush=False 설정을 전제로 동작하도록 구성
